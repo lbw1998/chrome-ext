@@ -1,0 +1,42 @@
+{
+  "manifest_version": 2,
+  "name": "virtai-chrome-ext",
+  "description": "趋动科技Gemini前端开发工具",
+  "version": "0.0.1",
+  "icons": {
+    "16": "imgs/logo16.png",
+    "48": "imgs/logo48.png"
+  },
+  "options_page": "options.html",
+  "browser_action": {
+    "default_icon": "imgs/logo16.png",
+    "default_title": "virtai-chrome-ext",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "page": "background.html",
+    "persistent": true
+  },
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "storage",
+    "cookies",
+    "<all_urls>",
+    "webRequestBlocking",
+    "unlimitedStorage"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://*.virtaicloud.com:*/*"],
+      "js": ["js/content.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["http://jira.virtaitech.com/browse/VP-*", "http://10.7.10.13/browse/VP-*"],
+      "js": ["js/jira.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}

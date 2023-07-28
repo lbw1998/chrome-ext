@@ -1,0 +1,26 @@
+{
+  "name": "virtai-chrome-ext",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vue-cli-service build --watch",
+    "build": "vue-cli-service build",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "ant-design-vue": "^4.0.0",
+    "core-js": "2",
+    "vue": "^3.2.47"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.3",
+    "@babel/eslint-parser": "^7.21.3",
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
+    "@vue/compiler-sfc": "^3.2.47",
+    "@vue/eslint-config-standard": "^8.0.1",
+    "copy-webpack-plugin": "^11.0.0",
+    "eslint": "^8.36.0",
+    "eslint-plugin-vue": "^9.9.0"
+  }
+}
