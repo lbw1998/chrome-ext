@@ -1,13 +1,15 @@
 /* eslint-disable no-undef */
 import { getItem, setItem } from '../../utils/storage'
-import { PROXY, PROXY_LIST, IS_REFRESH_TOKEN, SUFFIX, PORT } from '../../utils/constant'
+import { PROXY, PROXY_LIST, SCENE, IS_REFRESH_TOKEN, SUFFIX, PORT } from '../../utils/constant'
 
 let timer // 存放定时器
 let proxy = PROXY
+let scene = SCENE
 const proxyList = PROXY_LIST
 const isRefreshToken = IS_REFRESH_TOKEN
 
-getItem(['proxyList', 'proxy'], function (result) {
+getItem(['proxyList', 'scene', 'proxy'], function (result) {
+  scene = result.scene
   if (!result.proxyList) {
     init()
   } else {
@@ -16,7 +18,7 @@ getItem(['proxyList', 'proxy'], function (result) {
 })
 
 const init = () => {
-  setItem({ proxy, proxyList, isRefreshToken })
+  setItem({ proxy, proxyList, scene, isRefreshToken })
 }
 
 const getCookies = () => {
@@ -38,6 +40,9 @@ getCookies()
 // iframe请求添加cookies
 chrome.webRequest.onBeforeSendHeaders.addListener(
   function (details) {
+    if (scene === 'local') {
+      return {}
+    }
     // 判断当前请求是否来自iframe页面
     if (details.type === 'xmlhttprequest') {
       const regx = /.virtaicloud.com:\d+\/gemini\/v1/
@@ -116,10 +121,6 @@ const openJira = () => {
     chrome.tabs.onUpdated.addListener(clickEdit)
   })
 }
-
-chrome.cookies.set(
-  { url: 'https://www.virtaicloud.com/', domain: '.virtaicloud.com', name: 'g_token', value: '123', httpOnly: true, expirationDate: new Date().getTime() / 1000 + 60 * 60 * 3 }
-)
 
 // 自动刷新
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {

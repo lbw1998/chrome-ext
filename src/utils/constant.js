@@ -1,3 +1,4 @@
+export const SCENE = 'cloud'
 export const SUFFIX = '/gemini/v1'
 export const PORT = '31443' // 后端接口端口号
 export const BASE_URL = 'local.virtaicloud.com:31443'

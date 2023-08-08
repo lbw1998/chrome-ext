@@ -2,6 +2,16 @@
   <div>
     <h3>环境代理</h3>
     <div class="item">
+      <label>当前环境：</label>
+      <a-select
+        v-model:value="scene"
+        size="small"
+        :options="sceneList"
+        @change="sceneChange"
+      >
+      </a-select>
+    </div>
+    <div class="item">
       <label>代理地址：</label>
       <a-select
         ref="select"
@@ -19,12 +29,12 @@
       <label>同步Storage：</label>
       <a-button type="primary" @click="syncStorage">开始同步</a-button>
     </div>
-    <div class="item">
+    <!-- <div class="item">
       <label>
         自动刷新token:
       </label>
       <a-switch v-model:checked="isRefreshToken" @change="refreshChange" checked-children="开" un-checked-children="关" />
-    </div>
+    </div> -->
     <a-button class="btn" type="link" href="options.html" target="_blank">配置管理</a-button>
   </div>
 </template>
@@ -36,25 +46,49 @@ import { Button as AButton, Select as ASelect, Switch as ASwitch, message } from
 
 const proxy = ref('')
 const proxyList = ref([])
+const scene = ref('')
+const sceneList = ref([
+  {
+    label: '公有云',
+    value: 'cloud'
+  },
+  {
+    label: '私有云',
+    value: 'local'
+  }
+])
 const isRefreshToken = ref(false)
 
 const getStorage = () => {
-  getItem(['proxy', 'proxyList', 'isRefreshToken'], function (result) {
+  getItem(['proxy', 'proxyList', 'scene', 'isRefreshToken'], function (result) {
+    console.log({ result })
     proxy.value = result.proxy
+    scene.value = result.scene
     isRefreshToken.value = result.isRefreshToken
     proxyList.value = result.proxyList
+  })
+}
+
+// 刷新当前页面
+const refreshCurrentPage = () => {
+  // 获取当前选项卡ID
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    const tabId = tabs[0].id
+    // 刷新当前选项卡
+    chrome.tabs.reload(tabId)
   })
 }
 
 const proxyChange = (proxy) => {
   setItem({ proxy }, () => {
     chrome.runtime.sendMessage({ type: 'changeProxy' })
-    // 获取当前选项卡ID
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const tabId = tabs[0].id
-      // 刷新当前选项卡
-      chrome.tabs.reload(tabId)
-    })
+    refreshCurrentPage()
+  })
+}
+
+const sceneChange = (scene) => {
+  setItem({ scene }, () => {
+    refreshCurrentPage()
   })
 }
 
@@ -67,7 +101,7 @@ const refreshChange = (isRefreshToken) => {
 }
 
 const syncStorage = () => {
-  chrome.tabs.create({ url: proxy.value + ':31443', active: false }, newTab => {
+  chrome.tabs.create({ url: 'https://' + proxy.value + ':31443', active: false }, newTab => {
     chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
       if (tabId === newTab.id && changeInfo.status === 'complete') {
         // 在这里添加回调函数的代码

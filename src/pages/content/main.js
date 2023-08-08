@@ -1,20 +1,25 @@
-// import { getItem } from '../../utils/storage'
+import { getItem } from '../../utils/storage'
 
 // let timer
 
-// getItem(['proxy', 'isRefreshToken'], function (result) {
-//   const proxy = result.proxy
-//   if (proxy && proxy === location.hostname) {
-//     chrome.extension.onMessage.addListener((request, sender, sendResponse) => {
-//       if (request.message === 'syncStorage') {
-//         sendResponse({ code: 0, data: window.localStorage })
-//       }
-//     })
-//   }
-//   if (result.isRefreshToken) {
-//     refresh()
-//   }
-// })
+getItem(['proxy', 'scene', 'isRefreshToken'], function (result) {
+  const proxy = result.proxy
+  const scene = result.scene
+  const script = document.createElement('script')
+  script.innerHTML = `window.SCENE = '${scene}'`
+  document.head.appendChild(script)
+
+  if (proxy && proxy === location.hostname) {
+    chrome.extension.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.message === 'syncStorage') {
+        sendResponse({ code: 0, data: window.localStorage })
+      }
+    })
+  }
+  // if (result.isRefreshToken) {
+  //   refresh()
+  // }
+})
 
 // chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 //   // 在这里处理接收到的消息
