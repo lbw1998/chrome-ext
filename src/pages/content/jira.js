@@ -33,7 +33,7 @@ const copyJira = () => {
   const name = $('summary-val')
   const time = getCreateTime()
   const reporter = $('reporter-val')
-  const assignee = $('assignee-val')
+  const assignee = document.getElementById('header-details-user-fullname').getAttribute('data-username')
   const versions = $('versions-field')
   const fixVersions = $('fixVersions-field')
   const isEasyBug = $('wrap-labels').includes('一眼bug') ? '是' : '否'

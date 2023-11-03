@@ -6,47 +6,63 @@ export const PROXY = 'dev4.virtaicloud.com'
 export const PROXY_LIST = [
   {
     label: 'dev0',
-    value: 'dev0.virtaicloud.com'
+    scene: 'cloud',
+    value: 'dev0.virtaicloud.com:31443'
   },
   {
     label: 'dev1',
-    value: 'dev1.virtaicloud.com'
+    scene: 'local',
+    value: 'dev1.virtaicloud.com:31443'
   },
   {
     label: 'dev11',
-    value: 'dev11.virtaicloud.com'
+    scene: 'local',
+    value: 'dev11.virtaicloud.com:31443'
   },
   {
     label: 'dev21',
-    value: 'dev21.virtaicloud.com'
+    scene: 'cloud',
+    value: 'dev21.virtaicloud.com:31443'
   },
   {
     label: 'dev4',
-    value: 'dev4.virtaicloud.com'
+    scene: 'cloud',
+    value: 'platform-dev4.virtaicloud.com'
   },
   {
     label: 'dev7',
-    value: 'dev7.virtaicloud.com'
+    scene: 'cloud',
+    value: 'dev7.virtaicloud.com:31443'
   },
   {
     label: 'test0',
-    value: 'test0.virtaicloud.com'
+    scene: 'cloud',
+    value: 'test0.virtaicloud.com:31443'
   },
   {
     label: 'test1',
-    value: 'test1.virtaicloud.com'
+    scene: 'local',
+    value: 'test1.virtaicloud.com:31443'
   },
   {
     label: 'test2',
-    value: 'test2.virtaicloud.com'
+    scene: 'cloud',
+    value: 'platform-test2.virtaicloud.com'
   },
   {
     label: 'test3',
-    value: 'test3.virtaicloud.com'
+    scene: 'cloud',
+    value: 'platform-test3.virtaicloud.com'
   },
   {
     label: 'test4',
-    value: 'test4.virtaicloud.com'
+    scene: 'local',
+    value: 'test4.virtaicloud.com:31443'
+  },
+  {
+    label: 'mul',
+    scene: 'cloud',
+    value: 'platform-mul.virtaicloud.com'
   }
 ]
 export const IS_REFRESH_TOKEN = false

@@ -1,24 +1,31 @@
 /* eslint-disable no-undef */
 import { getItem, setItem } from '../../utils/storage'
-import { PROXY, PROXY_LIST, SCENE, IS_REFRESH_TOKEN, SUFFIX, PORT } from '../../utils/constant'
+import { PROXY, BASE_URL, PROXY_LIST, SCENE, IS_REFRESH_TOKEN, SUFFIX } from '../../utils/constant'
 
 let timer // 存放定时器
 let proxy = PROXY
 let scene = SCENE
-const proxyList = PROXY_LIST
+let proxyList = PROXY_LIST
+let whiteList = []
 const isRefreshToken = IS_REFRESH_TOKEN
-
-getItem(['proxyList', 'scene', 'proxy'], function (result) {
-  scene = result.scene
-  if (!result.proxyList) {
-    init()
-  } else {
-    proxy = result.proxy
-  }
-})
 
 const init = () => {
   setItem({ proxy, proxyList, scene, isRefreshToken })
+}
+
+const refreshData = () => {
+  getItem(['proxyList', 'scene', 'proxy'], function (result) {
+    if (!result.proxyList) {
+      init()
+    } else {
+      proxy = result.proxy
+      scene = result.scene
+      proxyList = result.proxyList
+      whiteList = proxyList.map(i => {
+        return /.*\.virtaicloud\.com:.*/.test(i.value)
+      }).filter(i => i !== undefined)
+    }
+  })
 }
 
 const getCookies = () => {
@@ -35,29 +42,35 @@ const getCookies = () => {
 }
 
 let cookieHeader = ''
+refreshData()
 getCookies()
 
 // iframe请求添加cookies
 chrome.webRequest.onBeforeSendHeaders.addListener(
   function (details) {
-    if (scene === 'local') {
+    if (!~details.initiator.indexOf(BASE_URL)) {
       return {}
     }
     // 判断当前请求是否来自iframe页面
     if (details.type === 'xmlhttprequest') {
       const regx = /.virtaicloud.com:\d+\/gemini\/v1/
-      if (regx.test(details.url)) {
+      const regx1 = /.virtaicloud.com+\/gemini\/v1/
+      if (regx.test(details.url) || regx1.test(details.url)) {
         for (let i = 0; i < details.requestHeaders.length; ++i) {
           if (details.requestHeaders[i].name === 'Cookie') {
+            if (scene === 'local') {
+              details.requestHeaders.splice(i, 1)
+            }
             break
           }
         }
-
-        // 修改请求头部信息中的Cookie字段
-        details.requestHeaders.push({
-          name: 'Cookie',
-          value: cookieHeader
-        })
+        if (scene !== 'local') {
+          // 修改请求头部信息中的Cookie字段
+          details.requestHeaders.push({
+            name: 'Cookie',
+            value: cookieHeader
+          })
+        }
       }
     }
     return { requestHeaders: details.requestHeaders }
@@ -68,17 +81,20 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
 
 chrome.webRequest.onBeforeRequest.addListener(
   function (details) {
+    if (~whiteList.indexOf(details.url.split('/')[2])) {
+      return {}
+    }
     const url = details.url
     const regx = /local.virtaicloud.com:\d+(\/gemini_web)?\/gemini\/v1/
     // 匹配需要替换的URL
     if (regx.test(url)) {
       // 构建新的URL地址
-      const newUrl = url.replace(regx, proxy + ':' + PORT + SUFFIX)
+      const newUrl = url.replace(regx, proxy + SUFFIX)
       // 返回修改后的URL信息
       return { redirectUrl: newUrl }
     }
   },
-  { urls: ['https://*.virtaicloud.com:*/gemini/v1/*', 'https://*.virtaicloud.com:*/gemini_web/gemini/v1/*'] },
+  { urls: ['https://local.virtaicloud.com:*/*'] },
   ['blocking']
 )
 
@@ -132,6 +148,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       refresh()
     }
   }
+  if (request.type === 'refreshData') {
+    refreshData()
+  }
 })
 
 const refresh = () => {
@@ -148,6 +167,6 @@ const requestToken = () => {
     return
   }
   const xhr = new XMLHttpRequest()
-  xhr.open('GET', `https://${proxy}:31443/gemini/v1/gemini_userauth/token/refresh?refreshToken=${refreshToken}`)
+  xhr.open('GET', `https://${proxy}/gemini/v1/gemini_userauth/token/refresh?refreshToken=${refreshToken}`)
   xhr.send()
 }

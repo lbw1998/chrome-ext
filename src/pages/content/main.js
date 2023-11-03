@@ -5,11 +5,15 @@ import { getItem } from '../../utils/storage'
 getItem(['proxy', 'scene', 'isRefreshToken'], function (result) {
   const proxy = result.proxy
   const scene = result.scene
-  const script = document.createElement('script')
-  script.innerHTML = `window.SCENE = '${scene}'`
-  document.head.appendChild(script)
 
-  if (proxy && proxy === location.hostname) {
+  // 只设置本地开发时候的环境
+  if (location.hostname === 'local.virtaicloud.com') {
+    const script = document.createElement('script')
+    script.innerHTML = `window.SCENE = '${scene}';window.__PUBLIC__ = window.SCENE === 'cloud';window.__PRIVATE__ = window.SCENE === 'local';`
+    document.head.appendChild(script)
+  }
+
+  if (proxy && ~proxy.indexOf(location.hostname)) {
     chrome.extension.onMessage.addListener((request, sender, sendResponse) => {
       if (request.message === 'syncStorage') {
         sendResponse({ code: 0, data: window.localStorage })

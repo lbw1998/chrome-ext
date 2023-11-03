@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "virtai-chrome-ext",
   "description": "趋动科技Gemini前端开发工具",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "icons": {
     "16": "imgs/logo16.png",
     "48": "imgs/logo48.png"

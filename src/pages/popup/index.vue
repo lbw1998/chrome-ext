@@ -40,13 +40,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { setItem, getItem } from '../../utils/storage'
 import { Button as AButton, Select as ASelect, Switch as ASwitch, message } from 'ant-design-vue'
 
 const proxy = ref('')
-const proxyList = ref([])
 const scene = ref('')
+const allProxyList = ref([])
 const sceneList = ref([
   {
     label: '公有云',
@@ -59,13 +59,17 @@ const sceneList = ref([
 ])
 const isRefreshToken = ref(false)
 
+const proxyList = computed(() => {
+  return allProxyList.value.filter(i => i.scene === scene.value)
+})
+
 const getStorage = () => {
   getItem(['proxy', 'proxyList', 'scene', 'isRefreshToken'], function (result) {
     console.log({ result })
     proxy.value = result.proxy
     scene.value = result.scene
     isRefreshToken.value = result.isRefreshToken
-    proxyList.value = result.proxyList
+    allProxyList.value = result.proxyList
   })
 }
 
@@ -88,7 +92,11 @@ const proxyChange = (proxy) => {
 
 const sceneChange = (scene) => {
   setItem({ scene }, () => {
-    refreshCurrentPage()
+    // 发送消息到 background 页面
+    chrome.runtime.sendMessage({ type: 'refreshData' })
+
+    proxy.value = proxyList.value[0].value
+    proxyChange(proxyList.value[0].value)
   })
 }
 
@@ -101,7 +109,7 @@ const refreshChange = (isRefreshToken) => {
 }
 
 const syncStorage = () => {
-  chrome.tabs.create({ url: 'https://' + proxy.value + ':31443', active: false }, newTab => {
+  chrome.tabs.create({ url: 'https://' + proxy.value, active: false }, newTab => {
     chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
       if (tabId === newTab.id && changeInfo.status === 'complete') {
         // 在这里添加回调函数的代码
