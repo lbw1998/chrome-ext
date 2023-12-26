@@ -51,16 +51,16 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     if (!~details.initiator.indexOf(BASE_URL)) {
       return {}
     }
-    // 判断当前请求是否来自iframe页面
-    if (details.type === 'xmlhttprequest') {
+    // 判断当前请求是否来自iframe页面  无界子项目的请求
+    if (details.frameId !== 0) {
       const regx = /.virtaicloud.com:\d+\/gemini\/v1/
       const regx1 = /.virtaicloud.com+\/gemini\/v1/
       if (regx.test(details.url) || regx1.test(details.url)) {
         for (let i = 0; i < details.requestHeaders.length; ++i) {
           if (details.requestHeaders[i].name === 'Cookie') {
-            if (scene === 'local') {
-              details.requestHeaders.splice(i, 1)
-            }
+            // if (scene === 'local') {
+            //   details.requestHeaders.splice(i, 1)
+            // }
             break
           }
         }
